@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GalacticalMC - Server Minecraft</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blu: #0a0e2a;
+    --blu2: #0d1240;
+    --blu3: #111840;
+    --viola: #6b21a8;
+    --viola-chiaro: #9333ea;
+    --viola-glow: #a855f7;
+    --azzurro: #3b82f6;
+    --testo: #c4b5fd;
+    --testo2: #7c6fa0;
+    --bianco: #f0eeff;
+    --stella: #e2d9f3;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Exo 2', sans-serif;
+    background: var(--blu);
+    color: var(--testo);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* STELLE SFONDO */
+  #stars-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 50px;
+    background: rgba(10, 14, 42, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(107, 33, 168, 0.3);
+  }
+
+  .nav-logo {
+    font-family: 'Orbitron', monospace;
+    color: var(--viola-glow);
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+  }
+
+  nav ul { list-style: none; display: flex; gap: 32px; }
+
+  nav ul li a {
+    color: var(--testo2);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  nav ul li a:hover { color: var(--viola-glow); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px 20px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .logo-bounce {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    animation: bounce 2.5s ease-in-out infinite;
+    margin-bottom: 32px;
+    filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.7));
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-22px) scale(1.03); }
+  }
+
+  .hero h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 3.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a855f7, #3b82f6, #a855f7);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 4s linear infinite;
+    letter-spacing: 4px;
+    margin-bottom: 14px;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--testo2);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+
+  .ip-box {
+    display: inline-block;
+    background: rgba(107, 33, 168, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    padding: 8px 24px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    color: var(--viola-glow);
+    letter-spacing: 3px;
+    margin-bottom: 36px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .ip-box:hover {
+    background: rgba(107, 33, 168, 0.3);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  }
+
+  .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+
+  .btn {
+    padding: 12px 32px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-transform: uppercase;
+  }
+
+  .btn-primary {
+    background: var(--viola);
+    color: var(--bianco);
+    border: 1px solid var(--viola-chiaro);
+    box-shadow: 0 0 15px rgba(107, 33, 168, 0.4);
+  }
+
+  .btn-primary:hover {
+    background: var(--viola-chiaro);
+    box-shadow: 0 0 25px rgba(147, 51, 234, 0.6);
+    transform: translateY(-2px);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--viola-glow);
+    border: 1px solid var(--viola-glow);
+  }
+
+  .btn-outline:hover {
+    background: rgba(168, 85, 247, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  }
+
+  /* SEPARATORE */
+  .sep {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(107,33,168,0.5), transparent);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* SEZIONI */
+  .section-wrap {
+    position: relative;
+    z-index: 1;
+    padding: 80px 50px;
+    max-width: 1150px;
+    margin: 0 auto;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.8rem;
+    color: var(--viola-glow);
+    letter-spacing: 3px;
+    text-align: center;
+    margin-bottom: 50px;
+    text-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+  }
+
+  .section-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(to right, var(--viola), var(--azzurro));
+    margin: 12px auto 0;
+  }
+
+  /* ANNUNCI */
+  .annunci-list { display: flex; flex-direction: column; gap: 16px; }
+
+  .annuncio {
+    background: rgba(13, 18, 64, 0.7);
+    border: 1px solid rgba(107, 33, 168, 0.25);
+    border-left: 3px solid var(--viola);
+    padding: 20px 24px;
+    transition: all 0.3s;
+    backdrop-filter: blur(4px);
+  }
+
+  .annuncio:hover {
+    border-color: var(--viola-glow);
+    box-shadow: 0 4px 20px rgba(107, 33, 168, 0.2);
+  }
+
+  .annuncio .data { font-size: 0.78rem; color: var(--testo2); margin-bottom: 6px; letter-spacing: 1px; }
+
+  .annuncio h4 {
+    font-family: 'Orbitron', monospace;
+    color: var(--bianco);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+  }
+
+  .annuncio p { color: var(--testo2); font-size: 0.9rem; line-height: 1.7; }
+
+  /* STORE */
+  .store-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+  }
+
+  .store-card {
+    background: rgba(13, 18, 64, 0.8);
+    border: 1px solid rgba(107, 33, 168, 0.3);
+    padding: 32px 24px;
+    text-align: center;
+    transition: all 0.3s;
+    backdrop-filter: blur(6px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .store-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--viola), var(--azzurro));
+    transform: scaleX(0);
+    transition: transform 0.3s;
+  }
+
+  .store-card:hover::before { transform: scaleX(1); }
+
+  .store-card:hover {
+    border-color: var(--viola-chiaro);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 35px rgba(107, 33, 168, 0.3);
+  }
+
+  .store-card.featured { border-color: var(--viola-chiaro); }
+
+  .badge {
+    display: inline-block;
+    background: var(--viola);
+    color: var(--bianco);
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    font-family: 'Orbitron', monospace;
+  }
+
+  .store-card h3 {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    color: var(--bianco);
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+  }
+
+  .store-card .price {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--viola-glow);
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+  }
+
+  .store-card .price span { font-size: 0.85rem; color: var(--testo2); font-weight: 300; }
+
+  .store-card ul { list-style: none; margin-bottom: 28px; text-align: left; }
+
+  .store-card ul li {
+    padding: 7px 0;
+    color: var(--testo2);
+    font-size: 0.88rem;
+    border-bottom: 1px solid rgba(107, 33, 168, 0.15);
+  }
+
+  .store-card ul li::before { content: '✦ '; color: var(--viola-glow); }
+
+  /* STAFF */
+  .staff-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 20px;
+  }
+
+  .staff-card {
+    background: rgba(13, 18, 64, 0.7);
+    border: 1px solid rgba(107, 33, 168, 0.25);
+    padding: 28px 16px;
+    text-align: center;
+    transition: all 0.3s;
+    backdrop-filter: blur(4px);
+  }
+
+  .staff-card:hover {
+    border-color: var(--viola-chiaro);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(107, 33, 168, 0.25);
+  }
+
+  .staff-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(107, 33, 168, 0.2);
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border: 2px solid rgba(168, 85, 247, 0.4);
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+  }
+
+  .staff-card h4 {
+    font-family: 'Orbitron', monospace;
+    color: var(--bianco);
+    font-size: 0.88rem;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .staff-card .ruolo {
+    font-size: 0.75rem;
+    color: var(--viola-glow);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 1;
+    background: rgba(10, 14, 42, 0.9);
+    border-top: 1px solid rgba(107, 33, 168, 0.3);
+    text-align: center;
+    padding: 30px;
+    color: var(--testo2);
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+  }
+
+  footer a { color: var(--viola-glow); text-decoration: none; }
+
+  /* ADMIN */
+  .admin-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+  }
+
+  .admin-overlay.active { display: flex; }
+
+  .admin-box {
+    background: var(--blu2);
+    border: 1px solid rgba(168, 85, 247, 0.5);
+    padding: 40px;
+    width: 100%;
+    max-width: 480px;
+    position: relative;
+    box-shadow: 0 0 40px rgba(107, 33, 168, 0.3);
+  }
+
+  .admin-box h2 {
+    font-family: 'Orbitron', monospace;
+    color: var(--viola-glow);
+    margin-bottom: 24px;
+    letter-spacing: 2px;
+    font-size: 1.1rem;
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+  }
+
+  .admin-box input, .admin-box textarea, .admin-box select {
+    width: 100%;
+    background: rgba(10, 14, 42, 0.8);
+    border: 1px solid rgba(107, 33, 168, 0.3);
+    color: var(--testo);
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .admin-box input:focus, .admin-box textarea:focus, .admin-box select:focus {
+    border-color: var(--viola-glow);
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.2);
+  }
+
+  .admin-box select option { background: var(--blu2); }
+  .admin-box textarea { height: 100px; resize: vertical; }
+
+  .close-btn {
+    position: absolute;
+    top: 14px; right: 18px;
+    background: none;
+    border: none;
+    color: var(--testo2);
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .close-btn:hover { color: var(--viola-glow); }
+
+  .msg-success {
+    background: rgba(107, 33, 168, 0.2);
+    border: 1px solid var(--viola);
+    color: var(--viola-glow);
+    padding: 10px 14px;
+    margin-top: 10px;
+    font-size: 0.88rem;
+    display: none;
+    letter-spacing: 1px;
+  }
+
+  /* HAMBURGER MENU */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    padding: 4px;
+    z-index: 300;
+  }
+
+  .hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--viola-glow);
+    transition: all 0.3s;
+    border-radius: 2px;
+  }
+
+  .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+  /* MOBILE NAV DRAWER */
+  .nav-drawer {
+    display: none;
+    position: fixed;
+    top: 0; right: -100%;
+    width: 75%;
+    max-width: 280px;
+    height: 100vh;
+    background: rgba(10, 14, 42, 0.98);
+    border-left: 1px solid rgba(107, 33, 168, 0.4);
+    z-index: 250;
+    padding: 80px 30px 30px;
+    transition: right 0.3s ease;
+    backdrop-filter: blur(16px);
+  }
+
+  .nav-drawer.open { right: 0; }
+
+  .nav-drawer ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .nav-drawer ul li a {
+    display: block;
+    padding: 16px 0;
+    color: var(--testo);
+    text-decoration: none;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(107, 33, 168, 0.15);
+    transition: color 0.2s, padding-left 0.2s;
+  }
+
+  .nav-drawer ul li a:hover {
+    color: var(--viola-glow);
+    padding-left: 8px;
+  }
+
+  .nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 240;
+  }
+
+  .nav-overlay.open { display: block; }
+
+  @media (max-width: 768px) {
+    /* NAV */
+    nav {
+      padding: 14px 20px;
+    }
+
+    nav > ul { display: none; }
+    .hamburger { display: flex; }
+    .nav-drawer { display: block; }
+
+    /* HERO */
+    .hero {
+      padding: 90px 20px 50px;
+      min-height: 100svh;
+    }
+
+    .hero h1 {
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+    }
+
+    .logo-bounce {
+      width: 120px;
+      height: 120px;
+    }
+
+    .hero-sub {
+      font-size: 0.9rem;
+      padding: 0 10px;
+    }
+
+    .ip-box {
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      padding: 8px 16px;
+    }
+
+    .hero-btns {
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .hero-btns .btn {
+      width: 100%;
+      max-width: 280px;
+      text-align: center;
+    }
+
+    /* SECTIONS */
+    .section-wrap {
+      padding: 55px 18px;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      margin-bottom: 32px;
+    }
+
+    /* ANNUNCI */
+    .annuncio {
+      padding: 16px 18px;
+    }
+
+    .annuncio h4 { font-size: 0.88rem; }
+
+    /* STORE */
+    .store-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .store-card {
+      padding: 24px 18px;
+    }
+
+    .store-card h3 { font-size: 1rem; }
+    .store-card .price { font-size: 1.8rem; }
+
+    /* STAFF */
+    .staff-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .staff-card { padding: 20px 10px; }
+    .staff-avatar { width: 58px; height: 58px; font-size: 1.5rem; }
+    .staff-card h4 { font-size: 0.78rem; }
+    .staff-card .ruolo { font-size: 0.68rem; }
+
+    /* ADMIN */
+    .admin-box {
+      padding: 28px 20px;
+      margin: 16px;
+      max-width: calc(100% - 32px);
+    }
+
+    .admin-box h2 { font-size: 0.95rem; }
+
+    /* FOOTER */
+    footer { padding: 24px 16px; font-size: 0.8rem; }
+  }
+
+  @media (max-width: 400px) {
+    .hero h1 { font-size: 1.5rem; }
+    .staff-grid { grid-template-columns: 1fr 1fr; }
+    .logo-bounce { width: 100px; height: 100px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<!-- NAV DRAWER OVERLAY -->
+<div class="nav-overlay" id="navOverlay" onclick="closeDrawer()"></div>
+<div class="nav-drawer" id="navDrawer">
+  <ul>
+    <li><a href="#home" onclick="closeDrawer()">Home</a></li>
+    <li><a href="#annunci" onclick="closeDrawer()">Annunci</a></li>
+    <li><a href="#store" onclick="closeDrawer()">Store</a></li>
+    <li><a href="#staff" onclick="closeDrawer()">Staff</a></li>
+    <li><a href="#" onclick="closeDrawer(); openAdmin(); return false;">Admin</a></li>
+  </ul>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">GALACTICAMC</div>
+  <ul>
+    <li><a href="#home">Home</a></li>
+    <li><a href="#annunci">Annunci</a></li>
+    <li><a href="#store">Store</a></li>
+    <li><a href="#staff">Staff</a></li>
+    <li><a href="#" onclick="openAdmin(); return false;">Admin</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" onclick="toggleDrawer()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="home">
+  <img src="https://cdn.discordapp.com/attachments/1412470582863335434/1511014664555860008/Nuovo_progetto_4.png?ex=6a1f9251&is=6a1e40d1&hm=5c31a374af80971fd2d74a24f2b9e7bcb8d33bd9f6ea9ebec6aefdf697088781&"
+       alt="GalacticaMC Logo" class="logo-bounce"
+       onerror="this.style.display='none'">
+  <h1>GALACTICAMC</h1>
+  <p class="hero-sub">Il server Minecraft che ti porta tra le stelle</p>
+  <div class="ip-box" onclick="copyIP()">▶ play.galacticalmc.it ◀</div>
+  <div class="hero-btns">
+    <a href="https://discord.gg/fB4uXrzgs5" target="_blank" class="btn btn-primary">Unisciti al Discord</a>
+    <a href="#store" class="btn btn-outline">Visita lo Store</a>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ANNUNCI -->
+<div class="section-wrap" id="annunci">
+  <h2 class="section-title">Annunci</h2>
+  <div class="annunci-list" id="annunci-list">
+    <div class="annuncio">
+      <div class="data">02 Giugno 2026</div>
+      <h4>Benvenuti su GalacticaMC!</h4>
+      <p>Il server è ufficialmente online. Unisciti alla nostra community su Discord e inizia la tua avventura galattica!</p>
+    </div>
+    <div class="annuncio">
+      <div class="data">02 Giugno 2026</div>
+      <h4>Store ora disponibile</h4>
+      <p>Acquista i tuoi pacchetti esclusivi dallo store. Ogni acquisto supporta lo sviluppo del server e sblocca contenuti speciali!</p>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- STORE -->
+<div class="section-wrap" id="store">
+  <h2 class="section-title">Store</h2>
+  <div class="store-grid" id="store-grid">
+
+    <div class="store-card">
+      <h3>Esploratore</h3>
+      <div class="price">Gratis <span>/sempre</span></div>
+      <ul>
+        <li>Accesso al server</li>
+        <li>Chat globale</li>
+        <li>Ruolo base</li>
+        <li>Supporto community</li>
+      </ul>
+      <a href="https://discord.gg/fB4uXrzgs5" target="_blank" class="btn btn-outline" style="display:block;text-align:center;">Unisciti</a>
+    </div>
+
+    <div class="store-card featured">
+      <div class="badge">Più Popolare</div>
+      <h3>Astronauta</h3>
+      <div class="price">€4.99 <span>/mese</span></div>
+      <ul>
+        <li>Tutto di Esploratore</li>
+        <li>Tag esclusivo</li>
+        <li>Kit mensile</li>
+        <li>Volo creativo</li>
+        <li>Priorità supporto</li>
+      </ul>
+      <a href="https://discord.gg/fB4uXrzgs5" target="_blank" class="btn btn-primary" style="display:block;text-align:center;">Acquista</a>
+    </div>
+
+    <div class="store-card">
+      <h3>Galattico</h3>
+      <div class="price">€9.99 <span>/mese</span></div>
+      <ul>
+        <li>Tutto di Astronauta</li>
+        <li>Tag colorato VIP</li>
+        <li>Base privata</li>
+        <li>Kit settimanale</li>
+        <li>Accesso zone esclusive</li>
+        <li>Comandi speciali</li>
+      </ul>
+      <a href="https://discord.gg/fB4uXrzgs5" target="_blank" class="btn btn-primary" style="display:block;text-align:center;">Acquista</a>
+    </div>
+
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- STAFF -->
+<div class="section-wrap" id="staff">
+  <h2 class="section-title">Staff</h2>
+  <div class="staff-grid" id="staff-grid">
+    <div class="staff-card">
+      <div class="staff-avatar">👑</div>
+      <h4>ItsNeox</h4>
+      <div class="ruolo">Owner</div>
+    </div>
+    <div class="staff-card">
+      <div class="staff-avatar">⚙️</div>
+      <h4>Staff Name</h4>
+      <div class="ruolo">Admin</div>
+    </div>
+    <div class="staff-card">
+      <div class="staff-avatar">🛡️</div>
+      <h4>Staff Name</h4>
+      <div class="ruolo">Moderatore</div>
+    </div>
+    <div class="staff-card">
+      <div class="staff-avatar">🛡️</div>
+      <h4>Staff Name</h4>
+      <div class="ruolo">Moderatore</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 GalacticaMC — Tutti i diritti riservati</p>
+  <p style="margin-top:8px;"><a href="https://discord.gg/fB4uXrzgs5" target="_blank">discord.gg/fB4uXrzgs5</a></p>
+</footer>
+
+<!-- ADMIN PANEL -->
+<div class="admin-overlay" id="adminOverlay">
+  <div c
